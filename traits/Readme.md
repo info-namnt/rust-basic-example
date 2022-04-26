@@ -1,0 +1,1 @@
+ Tạo chức năng mặc định cho đối tượng nào đó, giống với interface
