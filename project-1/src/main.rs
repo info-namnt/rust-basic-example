@@ -1,4 +1,4 @@
-use std::{io, vec, collections::HashMap};
+use std::{io, vec, collections::HashMap, hash::Hash, iter::StepBy};
 
 // CRUD APPLICATION
 
@@ -10,7 +10,7 @@ pub struct Student {
 }
 
 pub struct Students {
-    class: Vec<Student>
+    class: HashMap<String, Student>
 }
 
 
@@ -25,7 +25,7 @@ mod manager {
             None => return
         };
 
-
+        println!("Enter age of student:");
         let age = match get_int() {
             Some(input) => input,
             None => return
@@ -36,12 +36,46 @@ mod manager {
         students.add(student)
     }
 
-    pub fn view_all(students:&Students) {
+    pub fn view_all(students: &Students) {
         for student in students.view_all() {
             println!("{:?}", student);
         }
     }
 
+    pub fn remove_student(students: &mut Students) {
+        println!("Input name of Student:");
+        let name = match get_input() {
+            Some(input) => input,
+            None => return
+        };
+
+        if students.remove(&name){
+            println!("student is removed")
+        } else {
+            println!("Not found student")
+        }
+    }
+
+    pub fn edit_student(students: &mut Students) {
+        println!("Input name of Student:");
+
+        let name = match get_input() {
+            Some(input) => input,
+            None => return
+        };
+
+        println!("Input Age of Student:");
+        let age = match get_int() {
+            Some(input) => input,
+            None => return
+        };
+
+        if students.edit(&name, age) {
+            println!("Student has edit");
+        } else {
+            println!("not found")
+        }
+    }
 }
 
 impl Students {
@@ -52,20 +86,32 @@ impl Students {
     }
 
     fn add(&mut self, student: Student) {
-        self.class.insert(student)
+        self.class.insert(student.name.to_string(),student);
     }
 
     fn view_all(&self) -> Vec<&Student> {
-        self.class.iter().collect()
+        self.class.values().collect()
     }
 
+    fn remove(&mut self, name: &str) -> bool {
+        self.class.remove(name).is_some()
+    }
+
+    fn edit(&mut self, name: &str, age: i32) -> bool {
+        match self.class.get_mut(name) {
+            Some(student) => {
+                student.age = age;
+                true
+            },
+            None => false
+        }
+
+    }
 }
 
 
 
 fn get_int() -> Option<i32> {
-    println!("Enter age of student:");
-
     let input = match get_input() {
         Some(input) => input,
         None => return None
@@ -123,7 +169,8 @@ impl Manager {
             "4" => Some(Manager::DeleteStudent),            
             _ => None
         }
-    } 
+    }
+
 }
 fn main() {
     let mut students = Students::new();
@@ -134,10 +181,9 @@ fn main() {
         match Manager::choice(&input.as_str()) {
             Some(Manager::AddStudent) => manager::add_student(&mut students),
             Some(Manager::ViewStudent) => manager::view_all(&students),
-            Some(Manager::EditStudent) => (),
-            Some(Manager::DeleteStudent) => (),
+            Some(Manager::EditStudent) => manager::edit_student(&mut students),
+            Some(Manager::DeleteStudent) => manager::remove_student(&mut students),
             None => return
-            
         }
     }
 }
