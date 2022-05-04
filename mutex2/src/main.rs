@@ -26,18 +26,12 @@ fn transfer(from: ArcAccount, to: ArcAccount, amount: usize) {
     backoff::retry(backoff, op);
 }
 fn main() {
-    let a = Arc::new(Mutex::new(Account {balance:400}));
-    let b = Arc::new(Mutex::new(Account {balance:400}));
 
-    {
     let transaction_1 = thread::spawn(move || {
         transfer(a, b, 100);
     });
-    }
 
-    {
-        let transaction_2 = thread::spawn(move || {
-            transfer(b, a, 300);
-        });
-    }
+    let transaction_2 = thread::spawn(move || {
+        transfer(b, a, 300);
+    });
 }
